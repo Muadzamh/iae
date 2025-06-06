@@ -106,8 +106,8 @@ app.post('/loans', async (req, res) => {
     
     const book = bookResponse.data;
     
-    if (book.isLoaned == 1) {
-      return res.status(400).json({ message: 'Book is already on loan' });
+    if (book.stock == 0) {
+      return res.status(400).json({ message: 'Book has no stock' });
     }
     
     // Set tanggal peminjaman dan pengembalian
@@ -122,12 +122,9 @@ app.post('/loans', async (req, res) => {
     
     // Buat peminjaman baru
     const [result] = await loanDb.query(
-      'INSERT INTO loans (member_id, book_id, loan_date, return_date, status) VALUES (?, ?, ?, ?, NULL)',
-      [member_id, book_id, formatDate(loanDate), formatDate(dueDate), 'active']
+      'INSERT INTO loans (member_id, book_id, loan_date, return_date, due_date, status) VALUES (?, ?, ?, ?, ?, NULL)',
+      [member_id, book_id, formatDate(loanDate), null, formatDate(dueDate)]
     );
-    
-    // Update status buku menjadi dipinjam
-    await axios.put(`${BOOK_SERVICE_URL}/books/${book_id}/loan-status`, { isLoaned: true });
     
     // Ambil data peminjaman yang baru dibuat
     const [newLoan] = await loanDb.query('SELECT * FROM loans WHERE loan_id = ?', [result.insertId]);
@@ -161,8 +158,8 @@ app.put('/loans/:id/return', async (req, res) => {
       [returnDate, 'returned', req.params.id]
     );
     
-    // Update status buku menjadi tersedia
-    await axios.put(`${BOOK_SERVICE_URL}/books/${existingLoan[0].book_id}/loan-status`, { isLoaned: false });
+    // // Update status buku menjadi tersedia
+    // await axios.put(`${BOOK_SERVICE_URL}/books/${existingLoan[0].book_id}/loan-status`, { isLoaned: false });
     
     // Ambil data peminjaman yang sudah diupdate
     const [updatedLoan] = await loanDb.query('SELECT * FROM loans WHERE loan_id = ?', [req.params.id]);
@@ -228,8 +225,8 @@ app.put('/loans/:id/approve', async (req, res) => {
         ['active', req.params.id]
       );
       
-      // Update status buku menjadi dipinjam
-      await axios.put(`${BOOK_SERVICE_URL}/books/${existingLoan[0].book_id}/loan-status`, { isLoaned: true });
+      // // Update status buku menjadi dipinjam
+      // await axios.put(`${BOOK_SERVICE_URL}/books/${existingLoan[0].book_id}/loan-status`, { isLoaned: true });
     } else {
       // Reject loan
       await loanDb.query(
