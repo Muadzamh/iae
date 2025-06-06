@@ -1,0 +1,23 @@
+{
+    "name": "library-microservices-project",
+    "version": "1.0.0",
+    "description": "Service-to-Service Communication Project for EAI course - Library Management System",
+    "main": "app.js",
+    "scripts": {
+        "start:member": "node member-service/app.js",
+        "start:book": "node book-service/app.js",
+        "start:loan": "node loan-service/app.js",
+        "start:admin": "node admin-service/app.js",
+        "start": "concurrently \"npm run start:member\" \"npm run start:book\" \"npm run start:loan\" \"npm run start:admin\""
+    },
+    "dependencies": {
+        "axios": "^1.5.0",
+        "body-parser": "^1.20.2",
+        "cors": "^2.8.5",
+        "express": "^4.18.2",
+        "mysql2": "^3.14.0"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.1"
+    }
+}

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Books - Library Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex flex-col h-screen">
+        <!-- Top Navigation -->
+        <header class="bg-purple-800 text-white shadow-sm">
+            <div class="flex items-center justify-between p-4">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-xl font-bold">Library Management System</h1>
+                    <h2 class="text-sm opacity-75">Admin Panel</h2>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <nav>
+                        <ul class="flex space-x-4">
+                            <li>
+                                <a href="admin-dashboard.html" class="flex items-center p-2 rounded hover:bg-purple-700">
+                                    <i class="fas fa-tachometer-alt mr-2"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="admin-books.html" class="flex items-center p-2 rounded bg-purple-900">
+                                    <i class="fas fa-book mr-2"></i>
+                                    <span>Books</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="admin-members.html" class="flex items-center p-2 rounded hover:bg-purple-700">
+                                    <i class="fas fa-users mr-2"></i>
+                                    <span>Members</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="admin-loans.html" class="flex items-center p-2 rounded hover:bg-purple-700">
+                                    <i class="fas fa-exchange-alt mr-2"></i>
+                                    <span>Loans</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <span id="admin-name" class="text-white font-medium"></span>
+                        </div>
+                        <button id="logout-btn" class="bg-purple-700 hover:bg-purple-600 px-3 py-1 rounded">
+                            <i class="fas fa-sign-out-alt mr-1"></i>
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Content Area -->
+        <main class="flex-1 overflow-y-auto p-4">
+            <!-- Book Management Section -->
+            <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Book Management</h3>
+                    <button id="add-book-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">
+                        <i class="fas fa-plus mr-2"></i>Add New Book
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="text-left text-gray-500 text-sm">
+                                <th class="py-2 px-3">ID</th>
+                                <th class="py-2 px-3">Title</th>
+                                <th class="py-2 px-3">Author</th>
+                                <th class="py-2 px-3">ISBN</th>
+                                <th class="py-2 px-3">Stok</th>
+                                <th class="py-2 px-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="books-management-table">
+                            <!-- Data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Add/Edit Book Modal -->
+            <div id="book-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 id="modal-title" class="text-lg font-semibold">Add New Book</h3>
+                        <button id="close-modal-btn" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="book-form">
+                        <input type="hidden" id="book-id">
+                        
+                        <div class="mb-4">
+                            <label for="book-title" class="block text-gray-700 text-sm font-medium mb-1">Title</label>
+                            <input type="text" id="book-title" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="book-author" class="block text-gray-700 text-sm font-medium mb-1">Author</label>
+                            <input type="text" id="book-author" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="book-isbn" class="block text-gray-700 text-sm font-medium mb-1">ISBN</label>
+                            <input type="text" id="book-isbn" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="book-publisher" class="block text-gray-700 text-sm font-medium mb-1">Publisher</label>
+                            <input type="text" id="book-publisher" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="book-year" class="block text-gray-700 text-sm font-medium mb-1">Publication Year</label>
+                            <input type="number" id="book-year" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        
+                        <div class="flex justify-end">
+                            <button type="button" id="cancel-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded mr-2">
+                                Cancel
+                            </button>
+                            <button type="submit" id="save-book-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">
+                                Save Book
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Confirmation Modal -->
+            <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold">Confirm Delete</h3>
+                        <p class="text-gray-700 mt-2">Are you sure you want to delete this book? This action cannot be undone.</p>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button id="cancel-delete-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded mr-2">
+                            Cancel
+                        </button>
+                        <button id="confirm-delete-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // Check if user is logged in as admin
+        document.addEventListener('DOMContentLoaded', function() {
+            const isAdmin = localStorage.getItem('isAdmin');
+            if (isAdmin !== 'true') {
+                window.location.href = 'admin-login.html';
+                return;
+            }
+            
+            // Set admin name
+            const adminName = localStorage.getItem('adminName');
+            document.getElementById('admin-name').textContent = adminName || 'Admin';
+            
+            // Handle logout
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                localStorage.removeItem('adminId');
+                localStorage.removeItem('adminName');
+                localStorage.removeItem('adminEmail');
+                localStorage.removeItem('isAdmin');
+                window.location.href = 'admin-login.html';
+            });
+            
+            // Setup modal event listeners
+            setupModalEvents();
+            
+            // Fetch and display books
+            fetchAndDisplayBooks();
+        });
+        
+        function setupModalEvents() {
+            // Add book button
+            document.getElementById('add-book-btn').addEventListener('click', function() {
+                openModal('add');
+            });
+            
+            // Close modal buttons
+            document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+            document.getElementById('cancel-btn').addEventListener('click', closeModal);
+            
+            // Book form submission
+            document.getElementById('book-form').addEventListener('submit', handleSaveBook);
+            
+            // Cancel delete
+            document.getElementById('cancel-delete-btn').addEventListener('click', function() {
+                document.getElementById('confirm-modal').classList.add('hidden');
+            });
+        }
+        
+        function openModal(mode, bookData = null) {
+            const modal = document.getElementById('book-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const bookIdInput = document.getElementById('book-id');
+            const titleInput = document.getElementById('book-title');
+            const authorInput = document.getElementById('book-author');
+            const isbnInput = document.getElementById('book-isbn');
+            const publisherInput = document.getElementById('book-publisher');
+            const yearInput = document.getElementById('book-year');
+            
+            // Clear form
+            document.getElementById('book-form').reset();
+            
+            if (mode === 'edit' && bookData) {
+                modalTitle.textContent = 'Edit Book';
+                bookIdInput.value = bookData.book_id;
+                titleInput.value = bookData.title || '';
+                authorInput.value = bookData.author || '';
+                isbnInput.value = bookData.isbn || '';
+                publisherInput.value = bookData.publisher || '';
+                yearInput.value = bookData.publication_year || '';
+            } else {
+                modalTitle.textContent = 'Add New Book';
+                bookIdInput.value = '';
+            }
+            
+            modal.classList.remove('hidden');
+        }
+        
+        function closeModal() {
+            document.getElementById('book-modal').classList.add('hidden');
+        }
+        
+        async function fetchAndDisplayBooks() {
+            try {
+                // Fetch books data
+                const response = await fetch('http://localhost:3002/books');
+                const books = await response.json();
+                
+                // Fetch loans data to determine book status
+                const loansResponse = await fetch('http://localhost:3003/loans');
+                const loans = await loansResponse.json();
+                
+                // Get active loans (books currently on loan)
+                const activeLoans = loans.filter(loan => !loan.return_date);
+                const loanedBookIds = activeLoans.map(loan => loan.book_id);
+                
+                // Populate books management table
+                const booksTable = document.getElementById('books-management-table');
+                booksTable.innerHTML = '';
+                
+                // Sort books by ID for consistency
+                const sortedBooks = [...books].sort((a, b) => a.book_id - b.book_id);
+                
+                sortedBooks.forEach(book => {
+                    const isLoaned = loanedBookIds.includes(book.book_id);
+                    
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-100';
+                    
+                    row.innerHTML = `
+                        <td class="py-2 px-3">${book.book_id}</td>
+                        <td class="py-2 px-3">${book.title}</td>
+                        <td class="py-2 px-3">${book.author || 'Unknown'}</td>
+                        <td class="py-2 px-3">${book.isbn || 'N/A'}</td>
+                        <td class="py-2 px-3">${book.stock || 'N/A'}</td>
+                        <td class="py-2 px-3">
+                            <button data-book-id="${book.book_id}" class="edit-book-btn text-blue-600 hover:text-blue-800 mr-2">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button data-book-id="${book.book_id}" class="delete-book-btn text-red-600 hover:text-red-800 ${isLoaned ? 'opacity-50 cursor-not-allowed' : ''}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    booksTable.appendChild(row);
+                });
+                
+                // Add event listeners to action buttons
+                document.querySelectorAll('.edit-book-btn').forEach(btn => {
+                    btn.addEventListener('click', handleEditBook);
+                });
+                
+                document.querySelectorAll('.delete-book-btn').forEach(btn => {
+                    const bookId = btn.getAttribute('data-book-id');
+                    const isLoaned = loanedBookIds.includes(parseInt(bookId));
+                    
+                    if (!isLoaned) {
+                        btn.addEventListener('click', handleDeleteBook);
+                    }
+                });
+                
+                // Show placeholder if no books
+                if (sortedBooks.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = '<td colspan="6" class="py-4 text-center text-gray-500">No books found</td>';
+                    booksTable.appendChild(row);
+                }
+                
+            } catch (error) {
+                console.error('Error fetching books data:', error);
+                alert('Error loading books data. Please try again.');
+            }
+        }
+        
+        async function handleEditBook(event) {
+            const bookId = event.currentTarget.getAttribute('data-book-id');
+            
+            try {
+                const response = await fetch(`http://localhost:3002/books/${bookId}`);
+                const book = await response.json();
+                
+                openModal('edit', book);
+                
+            } catch (error) {
+                console.error('Error fetching book details:', error);
+                alert('Error loading book details. Please try again.');
+            }
+        }
+        
+        async function handleSaveBook(event) {
+            event.preventDefault();
+            
+            const bookId = document.getElementById('book-id').value;
+            const title = document.getElementById('book-title').value;
+            const author = document.getElementById('book-author').value;
+            const isbn = document.getElementById('book-isbn').value;
+            const publisher = document.getElementById('book-publisher').value;
+            const publicationYear = document.getElementById('book-year').value;
+            
+            const bookData = {
+                title,
+                author,
+                isbn,
+                publisher,
+                publication_year: publicationYear ? parseInt(publicationYear) : null
+            };
+            
+            try {
+                let response;
+                
+                if (bookId) {
+                    // Update existing book
+                    response = await fetch(`http://localhost:3002/books/${bookId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(bookData)
+                    });
+                } else {
+                    // Create new book
+                    response = await fetch('http://localhost:3002/books', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(bookData)
+                    });
+                }
+                
+                if (!response.ok) {
+                    throw new Error('Failed to save book');
+                }
+                
+                closeModal();
+                alert(bookId ? 'Book updated successfully' : 'Book added successfully');
+                
+                // Refresh books list
+                fetchAndDisplayBooks();
+                
+            } catch (error) {
+                console.error('Error saving book:', error);
+                alert('Error saving book. Please try again.');
+            }
+        }
+        
+        function handleDeleteBook(event) {
+            const bookId = event.currentTarget.getAttribute('data-book-id');
+            
+            // Show confirmation modal
+            const confirmModal = document.getElementById('confirm-modal');
+            confirmModal.classList.remove('hidden');
+            
+            // Setup confirm delete button
+            document.getElementById('confirm-delete-btn').onclick = async function() {
+                try {
+                    const response = await fetch(`http://localhost:3002/books/${bookId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to delete book');
+                    }
+                    
+                    // Hide confirmation modal
+                    confirmModal.classList.add('hidden');
+                    
+                    alert('Book deleted successfully');
+                    
+                    // Refresh books list
+                    fetchAndDisplayBooks();
+                    
+                } catch (error) {
+                    console.error('Error deleting book:', error);
+                    alert('Error deleting book. Please try again.');
+                    
+                    // Hide confirmation modal
+                    confirmModal.classList.add('hidden');
+                }
+            };
+        }
+    </script>
+</body>
+</html> 

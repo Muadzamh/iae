@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Library Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex flex-col h-screen">
+        <!-- Top Navigation -->
+        <header class="bg-purple-800 text-white shadow-sm">
+            <div class="flex items-center justify-between p-4">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-xl font-bold">Library Management System</h1>
+                    <h2 class="text-sm opacity-75">Admin Panel</h2>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <nav>
+                        <ul class="flex space-x-4">
+                            <li>
+                                <a href="#" class="flex items-center p-2 rounded bg-purple-900">
+                                    <i class="fas fa-tachometer-alt mr-2"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="admin-books.html" class="flex items-center p-2 rounded hover:bg-purple-700">
+                                    <i class="fas fa-book mr-2"></i>
+                                    <span>Books</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="admin-members.html" class="flex items-center p-2 rounded hover:bg-purple-700">
+                                    <i class="fas fa-users mr-2"></i>
+                                    <span>Members</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="admin-loans.html" class="flex items-center p-2 rounded hover:bg-purple-700">
+                                    <i class="fas fa-exchange-alt mr-2"></i>
+                                    <span>Loans</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <span id="admin-name" class="text-white font-medium"></span>
+                        </div>
+                        <button id="logout-btn" class="bg-purple-700 hover:bg-purple-600 px-3 py-1 rounded">
+                            <i class="fas fa-sign-out-alt mr-1"></i>
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Content Area -->
+        <main class="flex-1 overflow-y-auto p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-lg shadow-sm p-4">
+                    <div class="flex items-center">
+                        <div class="rounded-full bg-blue-100 p-3 text-blue-600">
+                            <i class="fas fa-book text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-gray-500 text-sm">Total Books</h3>
+                            <p id="total-books" class="text-2xl font-semibold">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-sm p-4">
+                    <div class="flex items-center">
+                        <div class="rounded-full bg-green-100 p-3 text-green-600">
+                            <i class="fas fa-users text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-gray-500 text-sm">Total Members</h3>
+                            <p id="total-members" class="text-2xl font-semibold">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-sm p-4">
+                    <div class="flex items-center">
+                        <div class="rounded-full bg-yellow-100 p-3 text-yellow-600">
+                            <i class="fas fa-book-reader text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-gray-500 text-sm">Active Loans</h3>
+                            <p id="active-loans" class="text-2xl font-semibold">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-sm p-4">
+                    <div class="flex items-center">
+                        <div class="rounded-full bg-red-100 p-3 text-red-600">
+                            <i class="fas fa-exclamation-circle text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-gray-500 text-sm">Overdue</h3>
+                            <p id="overdue-loans" class="text-2xl font-semibold">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Recent Loans -->
+                <div class="bg-white rounded-lg shadow-sm p-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">Recent Loans</h3>
+                        <a href="#" class="text-purple-600 text-sm hover:underline">View All</a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="text-left text-gray-500 text-sm">
+                                    <th class="py-2 px-3">Book</th>
+                                    <th class="py-2 px-3">Author</th>
+                                    <th class="py-2 px-3">Member</th>
+                                    <th class="py-2 px-3">Date</th>
+                                    <th class="py-2 px-3">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-loans-table">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- New Members -->
+                <div class="bg-white rounded-lg shadow-sm p-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">New Members</h3>
+                        <a href="#" class="text-purple-600 text-sm hover:underline">View All</a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="text-left text-gray-500 text-sm">
+                                    <th class="py-2 px-3">Name</th>
+                                    <th class="py-2 px-3">Email</th>
+                                    <th class="py-2 px-3">Joined</th>
+                                </tr>
+                            </thead>
+                            <tbody id="new-members-table">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // Check if user is logged in as admin
+        document.addEventListener('DOMContentLoaded', function() {
+            const isAdmin = localStorage.getItem('isAdmin');
+            if (isAdmin !== 'true') {
+                window.location.href = 'admin-login.html';
+                return;
+            }
+            
+            // Set admin name
+            const adminName = localStorage.getItem('adminName');
+            document.getElementById('admin-name').textContent = adminName || 'Admin';
+            
+            // Handle logout
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                localStorage.removeItem('adminId');
+                localStorage.removeItem('adminName');
+                localStorage.removeItem('adminEmail');
+                localStorage.removeItem('isAdmin');
+                window.location.href = 'admin-login.html';
+            });
+            
+            // Fetch dashboard data
+            fetchDashboardData();
+        });
+        
+        async function fetchDashboardData() {
+            try {
+                // Fetch total books
+                const booksResponse = await fetch('http://localhost:3002/books');
+                const books = await booksResponse.json();
+                document.getElementById('total-books').textContent = books.length;
+                
+                // Fetch total members
+                const membersResponse = await fetch('http://localhost:3001/members');
+                const members = await membersResponse.json();
+                document.getElementById('total-members').textContent = members.length;
+                
+                // Fetch loans data
+                const loansResponse = await fetch('http://localhost:3003/loans');
+                const loans = await loansResponse.json();
+                
+                // Calculate active loans
+                const activeLoans = loans.filter(loan => !loan.return_date);
+                document.getElementById('active-loans').textContent = activeLoans.length;
+                
+                // Calculate overdue loans
+                const today = new Date();
+                const overdueLoans = activeLoans.filter(loan => {
+                    const dueDate = new Date(loan.due_date);
+                    return dueDate < today;
+                });
+                document.getElementById('overdue-loans').textContent = overdueLoans.length;
+                
+                // Populate recent loans table
+                populateRecentLoans(loans, books, members);
+                
+                // Populate new members table
+                populateNewMembers(members);
+                
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+            }
+        }
+        
+        function populateRecentLoans(loans, books, members) {
+            const recentLoansTable = document.getElementById('recent-loans-table');
+            recentLoansTable.innerHTML = '';
+            
+            // Sort loans by date, most recent first
+            const sortedLoans = [...loans].sort((a, b) => new Date(b.loan_date) - new Date(a.loan_date)).slice(0, 5);
+            
+            sortedLoans.forEach(loan => {
+                const book = books.find(b => b.book_id === loan.book_id);
+                const member = members.find(m => m.member_id === loan.member_id);
+                
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-100';
+                
+                let status = '';
+                let statusClass = '';
+                
+                if (loan.status == null) {
+                    status = 'Requested';
+                    statusClass = 'text-blue-600 bg-yellow-100';
+                } else {
+                    const dueDate = new Date(loan.due_date);
+                    const today = new Date();
+                    
+                    if (dueDate < today) {
+                        status = 'Overdue';
+                        statusClass = 'text-red-600 bg-red-100';
+                    } else {
+                        status = loan.status || 'Active';
+                        statusClass = 'text-blue-600 bg-blue-100';
+                    }
+                }
+                
+                row.innerHTML = `
+                    <td class="py-2 px-3">${book ? book.title : 'Unknown'}</td>
+                    <td class="py-2 px-3">${book ? book.author || 'Unknown Author' : 'Unknown Author'}</td>
+                    <td class="py-2 px-3">${member ? member.name : 'Unknown'}</td>
+                    <td class="py-2 px-3">${new Date(loan.loan_date).toLocaleDateString()}</td>
+                    <td class="py-2 px-3"><span class="px-2 py-1 rounded-full text-xs ${statusClass}">${status}</span></td>
+                `;
+                
+                recentLoansTable.appendChild(row);
+            });
+            
+            // Show placeholder if no loans
+            if (sortedLoans.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="5" class="py-4 text-center text-gray-500">No loans found</td>';
+                recentLoansTable.appendChild(row);
+            }
+        }
+        
+        function populateNewMembers(members) {
+            const newMembersTable = document.getElementById('new-members-table');
+            newMembersTable.innerHTML = '';
+            
+            // Sort members by registration date, most recent first
+            const sortedMembers = [...members]
+                .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+                .slice(0, 5);
+            
+            sortedMembers.forEach(member => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-100';
+                
+                row.innerHTML = `
+                    <td class="py-2 px-3">${member.name}</td>
+                    <td class="py-2 px-3">${member.email}</td>
+                    <td class="py-2 px-3">${new Date(member.created_at || Date.now()).toLocaleDateString()}</td>
+                `;
+                
+                newMembersTable.appendChild(row);
+            });
+            
+            // Show placeholder if no members
+            if (sortedMembers.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="3" class="py-4 text-center text-gray-500">No members found</td>';
+                newMembersTable.appendChild(row);
+            }
+        }
+    </script>
+</body>
+</html> 
