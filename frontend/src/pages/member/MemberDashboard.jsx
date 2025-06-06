@@ -29,27 +29,34 @@ export const MemberDashboard = () => {
     const fetchDashboardData = async () => {
         try {
             const memberId = localStorage.getItem('memberId');
-    
+
             const loansResponse = await fetch(`http://localhost:3003/loans/member/${memberId}`);
             if (!loansResponse.ok) throw new Error('Failed to fetch loans data');
             const loans = await loansResponse.json();
-    
-            const activeLoans = loans.filter(loan => !loan.actual_return_date);
-            setCurrentLoans(activeLoans);
-    
-            const completedLoans = loans.filter(loan => loan.actual_return_date);
-            setBooksRead(completedLoans.length);
-    
-            const today = new Date();
-            const overdue = activeLoans.filter(loan => new Date(loan.due_date) < today);
-            setOverdueLoans(overdue.length);
-    
+
             const booksResponse = await fetch('http://localhost:3002/books');
             if (!booksResponse.ok) throw new Error('Failed to fetch books data');
             const books = await booksResponse.json();
-            
+
+            const activeLoans = loans.filter(loan => !loan.actual_return_date).map(loan => {
+                const book = books.find(b => b.book_id === loan.book_id);
+                return {
+                    ...loan,
+                    title: book ? book.title : 'Unknown Title',
+                    author: book ? book.author : 'Unknown Author'
+                };
+            });
+            setCurrentLoans(activeLoans);
+
+            const completedLoans = loans.filter(loan => loan.actual_return_date);
+            setBooksRead(completedLoans.length);
+
+            const today = new Date();
+            const overdue = activeLoans.filter(loan => new Date(loan.due_date) < today);
+            setOverdueLoans(overdue.length);
+
             setAvailableBooks(books.filter(book => book.stock >= 0));
-    
+
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
             alert('Error loading data. Please try refreshing the page.');
@@ -232,8 +239,8 @@ export const MemberDashboard = () => {
                                             }
                                             return (
                                                 <tr key={index} className="border-b border-gray-100">
-                                                    <td className="py-2 px-3">{loan.book_title || 'Unknown Title'}</td>
-                                                    <td className="py-2 px-3">{loan.book_author || 'Unknown Author'}</td>
+                                                    <td className="py-2 px-3">{loan.title || 'Unknown Title'}</td>
+                                                    <td className="py-2 px-3">{loan.author || 'Unknown Author'}</td>
                                                     <td className="py-2 px-3">{loanDate.toLocaleDateString()}</td>
                                                     <td className="py-2 px-3">{dueDate.toLocaleDateString()}</td>
                                                     <td className="py-2 px-3"><span className={`px-2 py-1 rounded-full text-xs ${statusClass}`}>{status}</span></td>

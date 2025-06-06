@@ -126,10 +126,10 @@ app.put('/books/:id/loan-status', async (req, res) => {
     }
     
     // Update status peminjaman buku
-    await bookDb.query(
-      'UPDATE books SET isLoaned = ? WHERE book_id = ?',
-      [isLoaned ? 1 : 0, req.params.id]
-    );
+    // await bookDb.query(
+    //   'UPDATE books SET isLoaned = ? WHERE book_id = ?',
+    //   [isLoaned ? 1 : 0, req.params.id]
+    // );
     
     // Ambil data buku yang sudah diupdate
     const [updatedBook] = await bookDb.query('SELECT * FROM books WHERE book_id = ?', [req.params.id]);
