@@ -1,0 +1,187 @@
+services:
+  # React Frontend
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - VITE_PORT=3000
+    depends_on:
+      - member-service
+      - book-service
+      - loan-service
+      - admin-service
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - perpus-network
+  
+  # API Gateway
+  gateway:
+    build:
+      context: ./backend/graphql-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=development
+      - PORT=4000
+    depends_on:
+      - member-service
+      - book-service
+      - loan-service
+      - admin-service
+    volumes:
+      - ./backend/graphql-gateway:/app
+      - /app/node_modules
+    networks:
+      - perpus-network
+
+  # Member Service
+  member-service:
+    build:
+      context: ./backend
+      dockerfile: member-service/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DATABASE_URL=postgresql://perpusasli:perpusasli@database:5432/perpusasli_db
+    depends_on:
+      - member-db
+      - books-db
+      - loans-db
+      - admin-db
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - perpus-network
+
+  # Book Service
+  book-service:
+    build:
+      context: ./backend
+      dockerfile: book-service/Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - DATABASE_URL=postgresql://perpusasli:perpusasli@database:5432/perpusasli_db
+    depends_on:
+      - books-db
+      - member-db
+      - loans-db
+      - admin-db
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - perpus-network
+
+  # Loan Service
+  loan-service:
+    build:
+      context: ./backend
+      dockerfile: loan-service/Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - PORT=3003
+      - DATABASE_URL=postgresql://perpusasli:perpusasli@database:5432/perpusasli_db
+    depends_on:
+      - loans-db
+      - member-db
+      - books-db
+      - admin-db
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - perpus-network
+
+  # Admin Service
+  admin-service:
+    build:
+      context: ./backend
+      dockerfile: admin-service/Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=development
+      - PORT=3004
+      - DATABASE_URL=postgresql://perpusasli:perpusasli@database:5432/perpusasli_db
+    depends_on:
+      - admin-db
+      - member-db
+      - books-db
+      - loans-db
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - perpus-network
+
+  # Databases
+  member-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: member
+    ports:
+      - "3307:3306"
+    volumes:
+      - member-db-data:/var/lib/mysql
+    networks:
+      - perpus-network
+
+  books-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: books
+    ports:
+      - "3308:3306"
+    volumes:
+      - books-db-data:/var/lib/mysql
+    networks:
+      - perpus-network
+
+  loans-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: loans
+    ports:
+      - "3309:3306"
+    volumes:
+      - loans-db-data:/var/lib/mysql
+    networks:
+      - perpus-network
+
+  admin-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: admin
+    ports:
+      - "3310:3306"
+    volumes:
+      - admin-db-data:/var/lib/mysql
+    networks:
+      - perpus-network
+
+volumes:
+  member-db-data:
+  books-db-data:
+  loans-db-data:
+  admin-db-data:
+
+networks:
+  perpus-network:
+    driver: bridge
