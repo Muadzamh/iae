@@ -1,3 +1,5 @@
+# version: '3.8' (Dihapus karena sudah tidak diperlukan)
+
 services:
   # React Frontend
   frontend:
@@ -6,28 +8,29 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
-      - VITE_PORT=3000
+      - VITE_API_URL=http://localhost:3005/graphql
     depends_on:
-      - member-service
-      - book-service
-      - loan-service
-      - admin-service
+      - gateway
     volumes:
       - ./frontend:/app
       - /app/node_modules
     networks:
       - perpus-network
-  
-  # API Gateway
+
+  # API Gateway (GraphQL)
   gateway:
     build:
+      # DIPERBAIKI: Context menunjuk langsung ke folder gateway
       context: ./backend/graphql-gateway
-      dockerfile: Dockerfile
     ports:
-      - "3005:3005"
+      - "3005:4000"
     environment:
       - NODE_ENV=development
       - PORT=4000
+      - MEMBER_SERVICE_URL=http://member-service:3001
+      - BOOK_SERVICE_URL=http://book-service:3002
+      - LOAN_SERVICE_URL=http://loan-service:3003
+      - ADMIN_SERVICE_URL=http://admin-service:3004
     depends_on:
       - member-service
       - book-service
@@ -42,21 +45,21 @@ services:
   # Member Service
   member-service:
     build:
-      context: ./backend
-      dockerfile: member-service/Dockerfile
+      # DIPERBAIKI: Context menunjuk langsung ke folder service
+      context: ./backend/member-service
     ports:
       - "3001:3001"
     environment:
       - NODE_ENV=development
       - PORT=3001
-      - DATABASE_URL=postgresql://perpusasli:perpusasli@database:5432/perpusasli_db
+      - DB_HOST=iae-db
+      - DB_USER=root
+      - DB_PASSWORD=rootpass
+      - DB_NAME=db_member
     depends_on:
-      - member-db
-      - books-db
-      - loans-db
-      - admin-db
+      iae-db: { condition: service_healthy }
     volumes:
-      - ./backend:/app
+      - ./backend/member-service:/app
       - /app/node_modules
     networks:
       - perpus-network
@@ -64,21 +67,21 @@ services:
   # Book Service
   book-service:
     build:
-      context: ./backend
-      dockerfile: book-service/Dockerfile
+      # DIPERBAIKI: Context menunjuk langsung ke folder service
+      context: ./backend/book-service
     ports:
       - "3002:3002"
     environment:
       - NODE_ENV=development
       - PORT=3002
-      - DATABASE_URL=postgresql://perpusasli:perpusasli@database:5432/perpusasli_db
+      - DB_HOST=iae-db
+      - DB_USER=root
+      - DB_PASSWORD=rootpass
+      - DB_NAME=db_books
     depends_on:
-      - books-db
-      - member-db
-      - loans-db
-      - admin-db
+      iae-db: { condition: service_healthy }
     volumes:
-      - ./backend:/app
+      - ./backend/book-service:/app
       - /app/node_modules
     networks:
       - perpus-network
@@ -86,21 +89,25 @@ services:
   # Loan Service
   loan-service:
     build:
-      context: ./backend
-      dockerfile: loan-service/Dockerfile
+      # DIPERBAIKI: Context menunjuk langsung ke folder service
+      context: ./backend/loan-service
     ports:
       - "3003:3003"
     environment:
       - NODE_ENV=development
       - PORT=3003
-      - DATABASE_URL=postgresql://perpusasli:perpusasli@database:5432/perpusasli_db
+      - DB_HOST=iae-db
+      - DB_USER=root
+      - DB_PASSWORD=rootpass
+      - DB_NAME=db_loans
+      - MEMBER_SERVICE_URL=http://member-service:3001
+      - BOOK_SERVICE_URL=http://book-service:3002
     depends_on:
-      - loans-db
-      - member-db
-      - books-db
-      - admin-db
+      iae-db: { condition: service_healthy }
+      member-service: { condition: service_started }
+      book-service: { condition: service_started }
     volumes:
-      - ./backend:/app
+      - ./backend/loan-service:/app
       - /app/node_modules
     networks:
       - perpus-network
@@ -108,79 +115,60 @@ services:
   # Admin Service
   admin-service:
     build:
-      context: ./backend
-      dockerfile: admin-service/Dockerfile
+      # DIPERBAIKI: Context menunjuk langsung ke folder service
+      context: ./backend/admin-service
     ports:
       - "3004:3004"
     environment:
       - NODE_ENV=development
       - PORT=3004
-      - DATABASE_URL=postgresql://perpusasli:perpusasli@database:5432/perpusasli_db
+      - DB_HOST=iae-db
+      - DB_USER=root
+      - DB_PASSWORD=rootpass
+      - DB_NAME=db_admin
     depends_on:
-      - admin-db
-      - member-db
-      - books-db
-      - loans-db
+      iae-db: { condition: service_healthy }
     volumes:
-      - ./backend:/app
+      - ./backend/admin-service:/app
       - /app/node_modules
     networks:
       - perpus-network
 
-  # Databases
-  member-db:
+  # ... (service iae-db dan phpmyadmin tetap sama seperti sebelumnya) ...
+  # Database (MySQL)
+  iae-db:
     image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: member
+      - MYSQL_ROOT_PASSWORD=rootpass
     ports:
       - "3307:3306"
     volumes:
-      - member-db-data:/var/lib/mysql
-    networks:
-      - perpus-network
+      - iae-db-data:/var/lib/mysql
+      - ./init-db:/docker-entrypoint-initdb.d
+    networks: [perpus-network]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-prootpass"]
+      interval: 5s
+      retries: 10
 
-  books-db:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: books
+  # phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
     ports:
-      - "3308:3306"
-    volumes:
-      - books-db-data:/var/lib/mysql
-    networks:
-      - perpus-network
-
-  loans-db:
-    image: mysql:8.0
+      - "8081:80"
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: loans
-    ports:
-      - "3309:3306"
-    volumes:
-      - loans-db-data:/var/lib/mysql
-    networks:
-      - perpus-network
-
-  admin-db:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: admin
-    ports:
-      - "3310:3306"
-    volumes:
-      - admin-db-data:/var/lib/mysql
+      - PMA_ARBITRARY=1
+      - PMA_HOST=iae-db
+      - PMA_USER=root
+      - PMA_PASSWORD=rootpass
+    depends_on:
+      iae-db: { condition: service_healthy }
     networks:
       - perpus-network
 
 volumes:
-  member-db-data:
-  books-db-data:
-  loans-db-data:
-  admin-db-data:
+  iae-db-data:
 
 networks:
   perpus-network:

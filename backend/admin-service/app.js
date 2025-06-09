@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const axios = require('axios');
-const { adminDb, checkDatabaseConnection } = require('../config/db');
+const { adminDb } = require('./db');
 
 const app = express();
 const PORT = 3004;
@@ -16,12 +16,25 @@ app.use(cors());
 const LOAN_SERVICE_URL = 'http://localhost:3003';
 
 // Cek koneksi database
-checkDatabaseConnection()
-  .then(() => {
-    console.log('Database terhubung. Service siap digunakan');
+adminDb.query('SELECT 1')
+  .then(async () => {
+    console.log('Admin DB terhubung. Service siap digunakan');
+    // Pastikan tabel `admin` ada. Jika belum, buat otomatis.
+    try {
+      await adminDb.query(`CREATE TABLE IF NOT EXISTS admin (
+        admin_id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB`);
+      console.log('Tabel admin siap.');
+    } catch (err) {
+      console.error('Gagal membuat tabel admin:', err);
+    }
   })
   .catch(err => {
-    console.error('Gagal terhubung ke database:', err);
+    console.error('Gagal terhubung ke Admin DB:', err);
   });
 
 // Health check
