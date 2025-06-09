@@ -4,6 +4,7 @@ const mysql = require('mysql2/promise');
 const bookDbConfig = {
     host: 'localhost',
     user: 'root',
+    port: 3308,
     password: '',
     database: 'books',
     waitForConnections: true,
@@ -15,6 +16,7 @@ const bookDbConfig = {
 const memberDbConfig = {
     host: 'localhost',
     user: 'root',
+    port: 3308,
     password: '',
     database: 'member',
     waitForConnections: true,
@@ -26,6 +28,7 @@ const memberDbConfig = {
 const loanDbConfig = {
     host: 'localhost',
     user: 'root',
+    port: 3308,
     password: '',
     database: 'loans',
     waitForConnections: true,
@@ -37,6 +40,7 @@ const loanDbConfig = {
 const adminDbConfig = {
     host: 'localhost',
     user: 'root',
+    port: 3308,
     password: '',
     database: 'admin',
     waitForConnections: true,
