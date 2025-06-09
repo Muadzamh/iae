@@ -2,7 +2,7 @@ const mysql = require('mysql2/promise');
 
 // Konfigurasi database untuk Book Service
 const bookDbConfig = {
-    host: process.env.BOOK_DB_HOST || 'books-db',
+    host: process.env.BOOK_DB_HOST || 'localhost',
     user: 'root',
     port: process.env.BOOK_DB_PORT || 3306,
     password: '',
@@ -14,7 +14,7 @@ const bookDbConfig = {
 
 // Konfigurasi database untuk Member Service
 const memberDbConfig = {
-    host: process.env.MEMBER_DB_HOST || 'member-db',
+    host: process.env.MEMBER_DB_HOST || 'localhost',
     user: 'root',
     port: process.env.MEMBER_DB_PORT || 3306,
     password: '',
@@ -26,7 +26,7 @@ const memberDbConfig = {
 
 // Konfigurasi database untuk Loan Service
 const loanDbConfig = {
-    host: process.env.LOAN_DB_HOST || 'loans-db',
+    host: process.env.LOAN_DB_HOST || 'localhost',
     user: 'root',
     port: process.env.LOAN_DB_PORT || 3306,
     password: '',
@@ -38,7 +38,7 @@ const loanDbConfig = {
 
 // Konfigurasi database untuk Admin Service
 const adminDbConfig = {
-    host: process.env.ADMIN_DB_HOST || 'admin-db',
+    host: process.env.ADMIN_DB_HOST || 'localhost',
     user: 'root',
     port: process.env.ADMIN_DB_PORT || 3306,
     password: '',

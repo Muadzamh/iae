@@ -94,11 +94,25 @@ const typeDefs = gql`
     password: String
   }
 
+    # Input untuk login member
+  input MemberLoginInput {
+    email: String!
+    password: String!
+  }
+
+
   # Input untuk membuat admin baru
   input CreateAdminInput {
     name: String!
     email: String!
     password: String!
+  }
+
+# Input untuk membuat update admin
+  input UpdateAdminInput {
+    name: String!
+    email: String!
+    password: String
   }
 
   # Input untuk login admin
@@ -118,10 +132,11 @@ const typeDefs = gql`
     createMember(input: CreateMemberInput!): Member
     updateMember(id: ID!, input: CreateMemberInput!): Member
     deleteMember(id: ID!): Member
+    loginMember(input: MemberLoginInput!): Member
     
     # Admin mutations
     createAdmin(input: CreateAdminInput!): Admin
-    updateAdmin(id: ID!, input: CreateAdminInput!): Admin
+    updateAdmin(id: ID!, input: UpdateAdminInput!): Admin
     deleteAdmin(id: ID!): Admin
     loginAdmin(input: AdminLoginInput!): Admin
     

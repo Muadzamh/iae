@@ -30,7 +30,7 @@ app.get('/health', (req, res) => {
 // Get all members
 app.get('/members', async (req, res) => {
   try {
-    const [rows] = await memberDb.query('SELECT member_id, name, email, created_at FROM member');
+    const [rows] = await memberDb.query('SELECT * FROM member');
     res.json(rows);
   } catch (error) {
     console.error('Error getting members:', error);
@@ -42,7 +42,7 @@ app.get('/members', async (req, res) => {
 app.get('/members/:id', async (req, res) => {
   try {
     const [rows] = await memberDb.query(
-      'SELECT member_id, name, email, created_at FROM member WHERE member_id = ?', 
+      'SELECT * FROM member WHERE member_id = ?', 
       [req.params.id]
     );
     
@@ -173,7 +173,7 @@ app.delete('/members/:id', async (req, res) => {
     // Hapus member
     await memberDb.query('DELETE FROM member WHERE member_id = ?', [req.params.id]);
     
-    res.json({ message: 'Member deleted successfully', member: existingMember[0] });
+    res.json({ message: 'Member deleted successfully',member_id: req.params.id });
   } catch (error) {
     console.error('Error deleting member:', error);
     res.status(500).json({ message: 'Failed to delete member' });

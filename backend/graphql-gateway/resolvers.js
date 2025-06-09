@@ -171,7 +171,7 @@ const resolvers = {
         return response.data;
       } catch (error) {
         console.error(`Error updating member ${id}:`, error);
-        throw new Error(`Failed to update member ${id}`);
+        throw new Error(`Failed to update member ${id}`, error);
       }
     },
     deleteMember: async (_, { id }) => {
