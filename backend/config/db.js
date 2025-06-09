@@ -2,9 +2,13 @@ const mysql = require('mysql2/promise');
 
 // Konfigurasi database untuk Book Service
 const bookDbConfig = {
-    host: 'localhost',
+    host: process.env.BOOK_DB_HOST || 'localhost',
     user: 'root',
+<<<<<<< HEAD:perpusasli/config/db.js
     port: 3308,
+=======
+    port: process.env.BOOK_DB_PORT || 3306,
+>>>>>>> 7cc837d3bbfa80ae4a99603ad04a1fdf464a68d4:backend/config/db.js
     password: '',
     database: 'books',
     waitForConnections: true,
@@ -14,9 +18,13 @@ const bookDbConfig = {
 
 // Konfigurasi database untuk Member Service
 const memberDbConfig = {
-    host: 'localhost',
+    host: process.env.MEMBER_DB_HOST || 'localhost',
     user: 'root',
+<<<<<<< HEAD:perpusasli/config/db.js
     port: 3308,
+=======
+    port: process.env.MEMBER_DB_PORT || 3306,
+>>>>>>> 7cc837d3bbfa80ae4a99603ad04a1fdf464a68d4:backend/config/db.js
     password: '',
     database: 'member',
     waitForConnections: true,
@@ -26,9 +34,13 @@ const memberDbConfig = {
 
 // Konfigurasi database untuk Loan Service
 const loanDbConfig = {
-    host: 'localhost',
+    host: process.env.LOAN_DB_HOST || 'localhost',
     user: 'root',
+<<<<<<< HEAD:perpusasli/config/db.js
     port: 3308,
+=======
+    port: process.env.LOAN_DB_PORT || 3306,
+>>>>>>> 7cc837d3bbfa80ae4a99603ad04a1fdf464a68d4:backend/config/db.js
     password: '',
     database: 'loans',
     waitForConnections: true,
@@ -38,9 +50,13 @@ const loanDbConfig = {
 
 // Konfigurasi database untuk Admin Service
 const adminDbConfig = {
-    host: 'localhost',
+    host: process.env.ADMIN_DB_HOST || 'localhost',
     user: 'root',
+<<<<<<< HEAD:perpusasli/config/db.js
     port: 3308,
+=======
+    port: process.env.ADMIN_DB_PORT || 3306,
+>>>>>>> 7cc837d3bbfa80ae4a99603ad04a1fdf464a68d4:backend/config/db.js
     password: '',
     database: 'admin',
     waitForConnections: true,

@@ -258,7 +258,7 @@ app.delete('/loans/:id', async (req, res) => {
     // Hapus peminjaman
     await loanDb.query('DELETE FROM loans WHERE loan_id = ?', [req.params.id]);
     
-    res.json({ message: 'Loan deleted successfully', loan: existingLoan[0] });
+    res.json({ message: 'Loan deleted successfully', loan_id: req.params.id});
   } catch (error) {
     console.error('Error deleting loan:', error);
     res.status(500).json({ message: 'Failed to delete loan' });

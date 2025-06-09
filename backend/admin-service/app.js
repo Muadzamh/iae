@@ -176,7 +176,7 @@ app.delete('/admins/:id', async (req, res) => {
     // Hapus admin
     await adminDb.query('DELETE FROM admin WHERE admin_id = ?', [req.params.id]);
     
-    res.json({ message: 'Admin deleted successfully', admin: existingAdmin[0] });
+    res.json({ message: 'Admin deleted successfully', admin_id: req.params.id });
   } catch (error) {
     console.error('Error deleting admin:', error);
     res.status(500).json({ message: 'Failed to delete admin' });
