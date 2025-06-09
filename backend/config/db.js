@@ -4,11 +4,7 @@ const mysql = require('mysql2/promise');
 const bookDbConfig = {
     host: process.env.BOOK_DB_HOST || 'localhost',
     user: 'root',
-<<<<<<< HEAD:perpusasli/config/db.js
-    port: 3308,
-=======
     port: process.env.BOOK_DB_PORT || 3306,
->>>>>>> 7cc837d3bbfa80ae4a99603ad04a1fdf464a68d4:backend/config/db.js
     password: '',
     database: 'books',
     waitForConnections: true,
@@ -20,11 +16,7 @@ const bookDbConfig = {
 const memberDbConfig = {
     host: process.env.MEMBER_DB_HOST || 'localhost',
     user: 'root',
-<<<<<<< HEAD:perpusasli/config/db.js
-    port: 3308,
-=======
     port: process.env.MEMBER_DB_PORT || 3306,
->>>>>>> 7cc837d3bbfa80ae4a99603ad04a1fdf464a68d4:backend/config/db.js
     password: '',
     database: 'member',
     waitForConnections: true,
@@ -36,11 +28,7 @@ const memberDbConfig = {
 const loanDbConfig = {
     host: process.env.LOAN_DB_HOST || 'localhost',
     user: 'root',
-<<<<<<< HEAD:perpusasli/config/db.js
-    port: 3308,
-=======
     port: process.env.LOAN_DB_PORT || 3306,
->>>>>>> 7cc837d3bbfa80ae4a99603ad04a1fdf464a68d4:backend/config/db.js
     password: '',
     database: 'loans',
     waitForConnections: true,
@@ -52,11 +40,7 @@ const loanDbConfig = {
 const adminDbConfig = {
     host: process.env.ADMIN_DB_HOST || 'localhost',
     user: 'root',
-<<<<<<< HEAD:perpusasli/config/db.js
-    port: 3308,
-=======
     port: process.env.ADMIN_DB_PORT || 3306,
->>>>>>> 7cc837d3bbfa80ae4a99603ad04a1fdf464a68d4:backend/config/db.js
     password: '',
     database: 'admin',
     waitForConnections: true,
