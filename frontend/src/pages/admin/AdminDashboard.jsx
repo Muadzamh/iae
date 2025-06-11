@@ -189,11 +189,29 @@ export const AdminDashboard = () => {
                                                 const today = new Date();
                                                 let status = '';
                                                 let statusClass = '';
-                                                if (dueDate < today) {
+                                                // 1. Cek jika data pinjaman tidak ada (null), maka statusnya 'requested'.
+                                                // Ini adalah prioritas utama.
+                                                if (!loan) {
+                                                    status = 'Requested';
+                                                    // Menggunakan warna kuning/amber untuk status 'requested' atau 'pending'
+                                                    statusClass = 'text-amber-600 bg-amber-100'; 
+                                                } 
+                                                // 2. Jika ada data, cek apakah statusnya sudah 'returned'.
+                                                else if (loan.status === 'returned') {
+                                                    status = 'Returned';
+                                                    // Menggunakan warna hijau untuk status 'completed' atau 'returned'
+                                                    statusClass = 'text-green-600 bg-green-100';
+                                                } 
+                                                // 3. Jika belum dikembalikan, cek apakah sudah lewat tanggal jatuh tempo.
+                                                else if (dueDate < today) {
                                                     status = 'Overdue';
+                                                    // Warna merah untuk 'overdue'
                                                     statusClass = 'text-red-600 bg-red-100';
-                                                } else {
-                                                    status = loan.status || 'Active';
+                                                } 
+                                                // 4. Jika semua kondisi di atas tidak terpenuhi, berarti pinjaman masih aktif.
+                                                else {
+                                                    status = 'Active';
+                                                    // Warna biru untuk status 'active'
                                                     statusClass = 'text-blue-600 bg-blue-100';
                                                 }
                                                 return (

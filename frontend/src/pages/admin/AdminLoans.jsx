@@ -198,7 +198,7 @@ export const AdminLoans = () => {
                                                     </>
                                                 );
                                             } else if (loan.status === 'active') {
-                                                const dueDate = new Date(loan.return_date);
+                                                const dueDate = new Date(loan.due_date);
                                                 const today = new Date();
                                                 if (dueDate < today) {
                                                     status = 'Overdue';
@@ -222,7 +222,7 @@ export const AdminLoans = () => {
                                                     <td className="py-2 px-3">{book ? book.title : 'Unknown'}</td>
                                                     <td className="py-2 px-3">{member ? member.name : 'Unknown'}</td>
                                                     <td className="py-2 px-3">{new Date(loan.loan_date).toLocaleDateString()}</td>
-                                                    <td className="py-2 px-3">{loan.return_date ? new Date(loan.return_date).toLocaleDateString() : 'N/A'}</td>
+                                                    <td className="py-2 px-3">{loan.due_date ? new Date(loan.due_date).toLocaleDateString() : 'N/A'}</td>
                                                     <td className="py-2 px-3"><span className={`px-2 py-1 rounded-full text-xs ${statusClass}`}>{status}</span></td>
                                                     <td className="py-2 px-3">{actionButtons}</td>
                                                 </tr>

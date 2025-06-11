@@ -117,7 +117,7 @@ export const AdminMembers = () => {
                                     ) : (
                                         members.sort((a, b) => a.member_id - b.member_id).map((member) => {
                                             const memberLoans = loans.filter(loan => loan.member_id === member.member_id);
-                                            const activeLoans = memberLoans.filter(loan => !loan.return_date);
+                                            const activeLoans = memberLoans.filter(loan => loan.status === 'active');
                                             return (
                                                 <tr key={member.member_id} className="border-b border-gray-100">
                                                     <td className="py-2 px-3">{member.member_id}</td>
