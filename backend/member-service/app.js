@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const axios = require('axios');
-const { memberDb, checkDatabaseConnection } = require('../config/db');
+const { memberDb } = require('./db');
 
 const app = express();
 const PORT = 3001;
@@ -12,14 +12,25 @@ const PORT = 3001;
 app.use(bodyParser.json());
 app.use(cors());
 
-// Cek koneksi database
-checkDatabaseConnection()
-  .then(() => {
-    console.log('Database terhubung. Service siap digunakan');
+// Cek koneksi Member DB saja
+memberDb.query('SELECT 1')
+  .then(async () => {
+    console.log('Member DB terhubung. Service siap digunakan');
+    // Pastikan tabel `member` ada. Jika belum, buat otomatis.
+    try {
+      await memberDb.query(`CREATE TABLE IF NOT EXISTS member (
+        member_id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB`);
+      console.log('Tabel member siap.');
+    } catch (err) {
+      console.error('Gagal membuat tabel member:', err);
+    }
   })
-  .catch(err => {
-    console.error('Gagal terhubung ke database:', err);
-  });
+  .catch(err => console.error('Gagal terhubung ke Member DB:', err));
 
 // Health check
 app.get('/health', (req, res) => {

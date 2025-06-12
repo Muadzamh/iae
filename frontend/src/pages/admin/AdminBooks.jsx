@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 
 export const AdminBooks = () => {
     const [adminName, setAdminName] = useState('Admin');
     const [books, setBooks] = useState([]);
-    const [modalOpen, setModalOpen] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [currentBook, setCurrentBook] = useState(null);
 
@@ -40,13 +40,70 @@ export const AdminBooks = () => {
     };
 
     const openModal = (book = null) => {
+        // Simpan book yang sedang diedit
         setCurrentBook(book);
-        setModalOpen(true);
-    };
 
-    const closeModal = () => {
-        setModalOpen(false);
-        setCurrentBook(null);
+        Swal.fire({
+            title: book ? 'Edit Book' : 'Add New Book',
+            html: `
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="display: flex; align-items: center;">
+                        <label for="swal-title" style="width: 80px; text-align: left; margin-right: 10px;">Title</label>
+                        <input id="swal-title" class="swal2-input" style="flex: 1;" placeholder="Title" value="${book ? book.title : ''}">
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <label for="swal-author" style="width: 80px; text-align: left; margin-right: 10px;">Author</label>
+                        <input id="swal-author" class="swal2-input" style="flex: 1;" placeholder="Author" value="${book ? book.author : ''}">
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <label for="swal-isbn" style="width: 80px; text-align: left; margin-right: 10px;">ISBN</label>
+                        <input id="swal-isbn" class="swal2-input" style="flex: 1;" placeholder="ISBN" value="${book ? book.isbn : ''}">
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <label for="swal-stock" style="width: 80px; text-align: left; margin-right: 10px;">Stock</label>
+                        <input id="swal-stock" type="number" class="swal2-input" style="flex: 1;" placeholder="Stock" value="${book ? book.stock : ''}">
+                    </div>
+                </div>
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            preConfirm: () => {
+                return {
+                    title: document.getElementById('swal-title').value,
+                    author: document.getElementById('swal-author').value,
+                    isbn: document.getElementById('swal-isbn').value,
+                    stock: document.getElementById('swal-stock').value,
+                };
+            }
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const bookData = result.value;
+                try {
+                    let response;
+                    if (book) {
+                        response = await fetch(`http://localhost:3002/books/${book.book_id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(bookData)
+                        });
+                    } else {
+                        response = await fetch('http://localhost:3002/books', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(bookData)
+                        });
+                    }
+
+                    if (!response.ok) throw new Error('Failed to save book');
+
+                    Swal.fire('Success', book ? 'Book updated successfully' : 'Book added successfully', 'success');
+                    fetchAndDisplayBooks();
+                } catch (error) {
+                    console.error('Error saving book:', error);
+                    Swal.fire('Error', 'Error saving book. Please try again.', 'error');
+                }
+            }
+        });
     };
 
     const openConfirm = (book) => {
@@ -59,41 +116,44 @@ export const AdminBooks = () => {
         setCurrentBook(null);
     };
 
-    const handleSaveBook = async (event) => {
-        event.preventDefault();
-
-        const bookData = {
-            title: event.target.title.value,
-            author: event.target.author.value,
-            isbn: event.target.isbn.value,
-            publisher: event.target.publisher.value,
-            publication_year: parseInt(event.target.year.value) || null
-        };
-
+    const openWarehouse = async (book) => {
         try {
-            let response;
-            if (currentBook) {
-                response = await fetch(`http://localhost:3002/books/${currentBook.book_id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(bookData)
+            const response = await fetch('/devtunnel/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query: `
+                        query GetHistoryByBarang($idBarang: Int!) {
+                            getHistoryByBarang(id_barang: $idBarang) {
+                                id_barang
+                                tanggal
+                                tipe_transaksi
+                                jumlah
+                            }
+                        }
+                    `,
+                    variables: { idBarang: book.book_id }
+                })
+            });
+            const result = await response.json();
+            if (result.data && result.data.getHistoryByBarang) {
+                const history = result.data.getHistoryByBarang;
+                const htmlContent = history.length === 0
+                    ? '<p>Tidak ada riwayat inventaris di gudang.</p>'
+                    : `<table class=\"min-w-full table-auto border\">\n                        <thead>\n                            <tr>\n                                <th class=\"px-4 py-2 border\">Tanggal</th>\n                                <th class=\"px-4 py-2 border\">Tipe Transaksi</th>\n                                <th class=\"px-4 py-2 border\">Jumlah</th>\n                            </tr>\n                        </thead>\n                        <tbody>\n                            ${history.map(item => `\n                                <tr>\n                                    <td class=\"px-4 py-2 border\">${new Date(item.tanggal).toLocaleString()}</td>\n                                    <td class=\"px-4 py-2 border\">${item.tipe_transaksi}</td>\n                                    <td class=\"px-4 py-2 border\">${item.jumlah}</td>\n                                </tr>`).join('')}\n                        </tbody>\n                    </table>`;
+
+                Swal.fire({
+                    title: `Riwayat Gudang - Buku ${book.title}`,
+                    html: htmlContent,
+                    width: 800,
+                    showCloseButton: true,
                 });
             } else {
-                response = await fetch('http://localhost:3002/books', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(bookData)
-                });
+                throw new Error('No data returned');
             }
-
-            if (!response.ok) throw new Error('Failed to save book');
-
-            closeModal();
-            alert(currentBook ? 'Book updated successfully' : 'Book added successfully');
-            fetchAndDisplayBooks();
         } catch (error) {
-            console.error('Error saving book:', error);
-            alert('Error saving book. Please try again.');
+            console.error('Error fetching warehouse history:', error);
+            Swal.fire('Error', 'Error fetching warehouse history. Please try again.', 'error');
         }
     };
 
@@ -194,14 +254,21 @@ export const AdminBooks = () => {
                                                 <td className="py-2 px-3">{book.title}</td>
                                                 <td className="py-2 px-3">{book.author || 'Unknown'}</td>
                                                 <td className="py-2 px-3">{book.isbn || 'N/A'}</td>
-                                                <td className="py-2 px-3">{book.stock || 'N/A'}</td>
+                                                <td className="py-2 px-3">{book.stock || '0'}</td>
                                                 <td className="py-2 px-3">
+                                                    {/* Tombol Edit dan Delete akan selalu muncul */}
                                                     <button onClick={() => openModal(book)} className="text-blue-600 hover:text-blue-800 mr-2">
-                                                        <i className="fas fa-edit"></i>
+                                                    <i className="fas fa-edit mr-2"></i>Edit
                                                     </button>
                                                     <button onClick={() => openConfirm(book)} className="text-red-600 hover:text-red-800">
-                                                        <i className="fas fa-trash"></i>
+                                                    <i className="fas fa-trash mr-2"></i>Delete
                                                     </button>
+                                                    {/* Tombol ini hanya muncul jika stok adalah 0 */}
+                                                    {book.stock === 0 && (
+                                                    <button onClick={() => openWarehouse(book)} className="text-yellow-600 hover:text-yellow-800 mr-2">
+                                                        <i className="fas fa-warehouse mr-2"></i>Lihat Gudang
+                                                    </button>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))
@@ -210,50 +277,6 @@ export const AdminBooks = () => {
                             </table>
                         </div>
                     </div>
-
-                    {modalOpen && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-lg font-semibold">{currentBook ? 'Edit Book' : 'Add New Book'}</h3>
-                                    <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
-                                        <i className="fas fa-times"></i>
-                                    </button>
-                                </div>
-                                <form onSubmit={handleSaveBook}>
-                                    <input type="hidden" name="book_id" defaultValue={currentBook ? currentBook.book_id : ''} />
-                                    <div className="mb-4">
-                                        <label htmlFor="title" className="block text-gray-700 text-sm font-medium mb-1">Title</label>
-                                        <input type="text" name="title" defaultValue={currentBook ? currentBook.title : ''} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" required />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label htmlFor="author" className="block text-gray-700 text-sm font-medium mb-1">Author</label>
-                                        <input type="text" name="author" defaultValue={currentBook ? currentBook.author : ''} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" required />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label htmlFor="isbn" className="block text-gray-700 text-sm font-medium mb-1">ISBN</label>
-                                        <input type="text" name="isbn" defaultValue={currentBook ? currentBook.isbn : ''} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label htmlFor="publisher" className="block text-gray-700 text-sm font-medium mb-1">Publisher</label>
-                                        <input type="text" name="publisher" defaultValue={currentBook ? currentBook.publisher : ''} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label htmlFor="year" className="block text-gray-700 text-sm font-medium mb-1">Publication Year</label>
-                                        <input type="number" name="year" defaultValue={currentBook ? currentBook.publication_year : ''} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" />
-                                    </div>
-                                    <div className="flex justify-end">
-                                        <button type="button" onClick={closeModal} className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded mr-2">
-                                            Cancel
-                                        </button>
-                                        <button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">
-                                            Save Book
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )}
 
                     {confirmOpen && (
                         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

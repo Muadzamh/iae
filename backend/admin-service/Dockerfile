@@ -1,21 +1,19 @@
+# Gunakan base image Node.js yang ringan
 FROM node:18-alpine
 
+# Tetapkan direktori kerja di dalam container
 WORKDIR /app
 
-# Copy package.json dari root project
+# Salin file package.json dan package-lock.json terlebih dahulu
+# Ini memanfaatkan cache Docker, sehingga 'npm install' tidak selalu dijalankan jika tidak ada perubahan
 COPY package*.json ./
 
-# Install dependensi
+# Install semua dependencies
 RUN npm install
 
-# Copy konfigurasi database
-COPY config ./config
+# Salin SEMUA file dari context (misal: dari ./backend/member-service) ke WORKDIR (/app)
+# Perintah ini menggantikan semua 'COPY' yang salah sebelumnya.
+COPY . .
 
-# Copy kode admin-service
-COPY admin-service ./admin-service
-
-# Expose port yang digunakan oleh admin-service
-EXPOSE 3004
-
-# Command untuk menjalankan aplikasi
-CMD ["node", "admin-service/app.js"]
+# Perintah untuk menjalankan aplikasi saat container dimulai
+CMD [ "node", "app.js" ]

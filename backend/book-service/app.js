@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const axios = require('axios');
-const { bookDb, checkDatabaseConnection } = require('../config/db');
+const { bookDb } = require('./db');
 
 const app = express();
 const PORT = 3002;
@@ -13,9 +13,23 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // Cek koneksi database
-checkDatabaseConnection()
-  .then(() => {
+bookDb.query('SELECT 1')
+  .then(async () => {
     console.log('Database terhubung. Service siap digunakan');
+    // Pastikan tabel `books` ada sesuai skema yang sudah Anda miliki
+    try {
+      await bookDb.query(`CREATE TABLE IF NOT EXISTS books (
+        book_id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(150) NOT NULL,
+        author VARCHAR(100) DEFAULT NULL,
+        isbn VARCHAR(20) NOT NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        stock INT DEFAULT 0
+      ) ENGINE=InnoDB`);
+      console.log('Struktur tabel books diverifikasi.');
+    } catch (err) {
+      console.error('Gagal membuat/verifikasi tabel books:', err);
+    }
   })
   .catch(err => {
     console.error('Gagal terhubung ke database:', err);
@@ -56,7 +70,7 @@ app.get('/books/:id', async (req, res) => {
 
 // Create new book
 app.post('/books', async (req, res) => {
-  const { title, isbn, stock, author } = req.body;
+  const { title, author, isbn, stock } = req.body;
   
   if (!title || !isbn || !stock || !author) {
     return res.status(400).json({ message: 'Title, ISBN, stock, and author are required' });
@@ -64,8 +78,8 @@ app.post('/books', async (req, res) => {
   
   try {
     const [result] = await bookDb.query(
-      'INSERT INTO books (title, isbn, stock, author, created_at) VALUES (?, ?, ?, ?, NOW())',
-      [title, isbn, stock, author]
+      'INSERT INTO books (title, author, isbn, stock, created_at) VALUES (?, ?, ?, ?, NOW())',
+      [title, author || null, isbn, stock || 0]
     );
     
     const [newBook] = await bookDb.query('SELECT * FROM books WHERE book_id = ?', [result.insertId]);
@@ -79,7 +93,7 @@ app.post('/books', async (req, res) => {
 
 // Update book
 app.put('/books/:id', async (req, res) => {
-  const { title, isbn, stock, author } = req.body;
+  const { title, author, isbn, stock } = req.body;
   
   try {
     // Cek apakah buku ada
@@ -91,12 +105,12 @@ app.put('/books/:id', async (req, res) => {
     
     // Update data buku
     await bookDb.query(
-      'UPDATE books SET title = ?, isbn = ?, stock = ?, author = ? WHERE book_id = ?',
+      'UPDATE books SET title = ?, author = ?, isbn = ?, stock = ? WHERE book_id = ?',
       [
         title || existingBook[0].title,
+        author !== undefined ? author : existingBook[0].author,
         isbn || existingBook[0].isbn,
-        stock || existingBook[0].stock,
-        author || existingBook[0].author,
+        stock !== undefined ? stock : existingBook[0].stock,
         req.params.id
       ]
     );
