@@ -7,12 +7,9 @@ const typeDefs = gql`
     title: String!
     author: String!
     isbn: String!
-    published_year: Int
-    genre: String
-    description: String
-    cover_image: String
-    isLoaned: Boolean
     loans: [Loan]
+    created_at: String
+    stock: Int
   }
 
   # Tipe untuk data anggota
@@ -81,10 +78,15 @@ const typeDefs = gql`
     title: String!
     author: String!
     isbn: String!
-    published_year: Int
-    genre: String
-    description: String
-    cover_image: String
+    stock: Int!
+  }
+  
+  # Input untuk update buku
+  input UpdateBookInput {
+    title: String
+    author: String
+    isbn: String
+    stock: Int
   }
 
   # Input untuk membuat anggota baru
@@ -125,7 +127,7 @@ const typeDefs = gql`
   type Mutation {
     # Book mutations
     createBook(input: CreateBookInput!): Book
-    updateBook(id: ID!, input: CreateBookInput!): Book
+    updateBook(id: ID!, input: UpdateBookInput!): Book
     deleteBook(id: ID!): Book
     
     # Member mutations

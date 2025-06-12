@@ -56,16 +56,16 @@ app.get('/books/:id', async (req, res) => {
 
 // Create new book
 app.post('/books', async (req, res) => {
-  const { title, isbn } = req.body;
+  const { title, isbn, stock, author } = req.body;
   
-  if (!title || !isbn) {
-    return res.status(400).json({ message: 'Title and ISBN are required' });
+  if (!title || !isbn || !stock || !author) {
+    return res.status(400).json({ message: 'Title, ISBN, stock, and author are required' });
   }
   
   try {
     const [result] = await bookDb.query(
-      'INSERT INTO books (title, isbn, isLoaned, created_at) VALUES (?, ?, ?, NOW())',
-      [title, isbn, 0]
+      'INSERT INTO books (title, isbn, stock, author, created_at) VALUES (?, ?, ?, ?, NOW())',
+      [title, isbn, stock, author]
     );
     
     const [newBook] = await bookDb.query('SELECT * FROM books WHERE book_id = ?', [result.insertId]);
@@ -79,7 +79,7 @@ app.post('/books', async (req, res) => {
 
 // Update book
 app.put('/books/:id', async (req, res) => {
-  const { title, isbn } = req.body;
+  const { title, isbn, stock, author } = req.body;
   
   try {
     // Cek apakah buku ada
@@ -91,10 +91,12 @@ app.put('/books/:id', async (req, res) => {
     
     // Update data buku
     await bookDb.query(
-      'UPDATE books SET title = ?, isbn = ? WHERE book_id = ?',
+      'UPDATE books SET title = ?, isbn = ?, stock = ?, author = ? WHERE book_id = ?',
       [
         title || existingBook[0].title,
         isbn || existingBook[0].isbn,
+        stock || existingBook[0].stock,
+        author || existingBook[0].author,
         req.params.id
       ]
     );
@@ -126,10 +128,10 @@ app.put('/books/:id/loan-status', async (req, res) => {
     }
     
     // Update status peminjaman buku
-    // await bookDb.query(
-    //   'UPDATE books SET isLoaned = ? WHERE book_id = ?',
-    //   [isLoaned ? 1 : 0, req.params.id]
-    // );
+    await bookDb.query(
+      'UPDATE books SET isLoaned = ? WHERE book_id = ?',
+      [isLoaned ? 1 : 0, req.params.id]
+    );
     
     // Ambil data buku yang sudah diupdate
     const [updatedBook] = await bookDb.query('SELECT * FROM books WHERE book_id = ?', [req.params.id]);
@@ -180,7 +182,7 @@ app.delete('/books/:id', async (req, res) => {
     // Hapus buku
     await bookDb.query('DELETE FROM books WHERE book_id = ?', [req.params.id]);
     
-    res.json({ message: 'Book deleted successfully', book: existingBook[0] });
+    res.json({ message: 'Book deleted successfully', book_id: req.params.id });
   } catch (error) {
     console.error('Error deleting book:', error);
     res.status(500).json({ message: 'Failed to delete book' });
